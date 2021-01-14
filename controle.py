@@ -10,20 +10,38 @@ banco = mysql.connector.connect(
     database="cadastro_produtos"
 )
 
+def funcao_login():
+    user = str(tela_login.lineEdit.text())
+    senha = str(tela_login.lineEdit_2.text())
 
+    if user == 'Tiago' and senha == '123':
+        menu.show()
+        tela_login.close()
+    else:
+        tela_login.label_4.setText("Usuário ou senha incorretos!")
+
+def funcao_cadastro():
+    tela_cadastro.show()
+
+def funcao_sair():
+    menu.close()
+
+def funcao_voltar():
+    tela_cadastro.close()
+    listagem.close()
 
 #Função para o botão 'Enviar', que guarda os dados recebidos do formulario em um banco de dados
-def funcao_principal():
-    linha1 = formulario.lineEdit.text()
-    linha2 = formulario.lineEdit_2.text()
-    linha3 = formulario.lineEdit_3.text()
+def funcao_enviar():
+    linha1 = tela_cadastro.lineEdit.text()
+    linha2 = tela_cadastro.lineEdit_2.text()
+    linha3 = tela_cadastro.lineEdit_3.text()
     categoria = ""
 
-    if formulario.radioButton.isChecked() :
+    if tela_cadastro.radioButton.isChecked() :
         categoria = "Informatica"
-    elif formulario.radioButton_2.isChecked() :
+    elif tela_cadastro.radioButton_2.isChecked() :
         categoria = "Alimentos"
-    elif formulario.radioButton_3.isChecked() :
+    elif tela_cadastro.radioButton_3.isChecked() :
         categoria = "Eletronicos"
     else:
         categoria = "Nao Especificada"
@@ -33,6 +51,7 @@ def funcao_principal():
     dados = (str(linha1), str(linha2), str(linha3), categoria)
     cursor.execute(comando_SQL, dados)
     banco.commit()
+    banco.close()
 
     print("Codigo: ", linha1)
     print("Descricao: ", linha2)
@@ -40,9 +59,9 @@ def funcao_principal():
     print(f"Categoria {categoria} Selecionada")
 
     #Limpa o que esta escrito no formulario para um novo cadastro
-    formulario.lineEdit.setText("")
-    formulario.lineEdit_2.setText("")
-    formulario.lineEdit_3.setText("")
+    tela_cadastro.lineEdit.setText("")
+    tela_cadastro.lineEdit_2.setText("")
+    tela_cadastro.lineEdit_3.setText("")
 
 
 
@@ -54,6 +73,7 @@ def funcao_listar():
     comando_SQL = "select * from produtos"
     cursor.execute(comando_SQL)
     dados_lidos = cursor.fetchall()
+    banco.close()
 
     listagem.tableWidget.setRowCount(len(dados_lidos))
     listagem.tableWidget.setColumnCount(4)
@@ -75,6 +95,7 @@ def funcao_pdf ():
     comando_SQL = "select * from produtos"
     cursor.execute(comando_SQL)
     dados_lidos = cursor.fetchall()
+    banco.close()
     y = 0
     pdf = canvas.Canvas("produtos-cadastrados.pdf")
     pdf.setFont("Times-Bold", 25)
@@ -110,19 +131,85 @@ def funcao_excluir_dado() :
     dados_lidos = cursor.fetchall()
     valor_id = dados_lidos[linha_selecionada][0] 
     cursor.execute("delete from produtos where id ="+ str(valor_id))
+    banco.close()
 
+def funcao_vender():
+
+    tela_venda.lineEdit.setText("")
+    tela_venda.lineEdit_2.setText("")
+    tela_venda.lineEdit_3.setText("")
+    tela_venda.lineEdit_4.setText("")
+    tela_venda.lineEdit_5.setText("")
+
+    tela_venda.show()
+
+    cursor = banco.cursor()
+    cursor.execute("select descricao from produtos")
+    desc = cursor.fetchall()
+    lista_desc = []
+    for i in range(len(desc)):
+        lista_desc.append(desc[i][0])
+
+    completer = QtWidgets.QCompleter(lista_desc)
+    tela_venda.lineEdit_4.setCompleter(completer)
+
+def funcao_completar():
+
+    cursor = banco.cursor()
+    
+    cod = tela_venda.lineEdit_2.text()
+    descri = str(tela_venda.lineEdit_4.text())
+    quant = tela_venda.lineEdit_3.text()
+
+    if descri :
+        tela_venda.lineEdit_2.setText("")
+        cursor.execute("select codigo from produtos where descricao ='{}'".format(descri))
+        codig = cursor.fetchall()
+        tela_venda.lineEdit_2.setText(str(codig[0][0]))
+        if quant :
+            cursor.execute("select preco from produtos where descricao ='{}'".format(descri))
+            valor_un = cursor.fetchall()
+            valor_total = ((valor_un[0][0]) * float(quant))
+            tela_venda.lineEdit_5.setText(str(valor_total))
+    elif cod :
+        cursor.execute("select descricao from produtos where codigo ="+ str(cod))
+        desc = cursor.fetchall()
+        tela_venda.lineEdit_4.setText(str(desc[0][0]))
+        if quant :
+            cursor.execute("select preco from produtos where codigo ="+ str(cod))
+            valor_un = cursor.fetchall()
+            valor_total = ((valor_un[0][0]) * float(quant))
+            tela_venda.lineEdit_5.setText(str(valor_total))
 
 #carrega os arquivos de interface do sistema
 app=QtWidgets.QApplication([])
-formulario=uic.loadUi("ui\principal.ui")
+tela_cadastro=uic.loadUi("ui\cadastro.ui")
 listagem=uic.loadUi("ui\listagem.ui")
 aviso_pdf=uic.loadUi("ui\warning_pdf.ui")
+tela_login=uic.loadUi("ui\login.ui")
+menu=uic.loadUi("ui\segunda_tela.ui")
+tela_venda=uic.loadUi("ui\window_venda.ui")
+
+#chama a funçao para o botão 'Login' 
+tela_login.pushButton.clicked.connect(funcao_login)
 
 #chama a funçao para o botão 'Enviar'
-formulario.pushButton.clicked.connect(funcao_principal)
+tela_cadastro.pushButton.clicked.connect(funcao_enviar)
+
+#chama a funçao para o botão 'Voltar'
+tela_cadastro.pushButton_2.clicked.connect(funcao_voltar)
+
+#chama a funçao para o botão 'Cadastrar'
+menu.pushButton.clicked.connect(funcao_cadastro)
 
 #chama a funçao para o botão 'Listar'
-formulario.pushButton_2.clicked.connect(funcao_listar)
+menu.pushButton_2.clicked.connect(funcao_listar)
+
+#chama a funçao para o botão 'Vender'
+menu.pushButton_3.clicked.connect(funcao_vender)
+
+#chama a funçao para o botão 'Sair'
+menu.pushButton_4.clicked.connect(funcao_sair)
 
 #chama a funçao para o botão 'PDF'
 listagem.pushButton.clicked.connect(funcao_pdf)
@@ -130,5 +217,11 @@ listagem.pushButton.clicked.connect(funcao_pdf)
 #chama a funçao para o botão 'Excluir'
 listagem.pushButton_2.clicked.connect(funcao_excluir_dado)
 
-formulario.show()
+#chama a funçao para o botão 'Voltar'
+listagem.pushButton_3.clicked.connect(funcao_voltar)
+
+#chama a funçao para o botão 'Completar'
+tela_venda.pushButton.clicked.connect(funcao_completar)
+
+tela_login.show()
 app.exec()

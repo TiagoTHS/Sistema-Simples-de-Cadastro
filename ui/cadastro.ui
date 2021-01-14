@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Main Menu</string>
+   <string>Cadastro de Produtos</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(102, 102, 102);</string>
@@ -253,10 +253,10 @@ background-color: rgb(0, 214, 103);</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(0, 69, 208);</string>
+     <string notr="true">background-color: rgb(244, 25, 45);</string>
     </property>
     <property name="text">
-     <string>Listar</string>
+     <string>Voltar</string>
     </property>
    </widget>
   </widget>
