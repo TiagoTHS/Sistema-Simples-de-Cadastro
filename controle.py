@@ -73,7 +73,6 @@ def funcao_listar():
     comando_SQL = "select * from produtos"
     cursor.execute(comando_SQL)
     dados_lidos = cursor.fetchall()
-    banco.close()
 
     listagem.tableWidget.setRowCount(len(dados_lidos))
     listagem.tableWidget.setColumnCount(4)
