@@ -96,6 +96,18 @@ color: rgb(0, 0, 0);</string>
     </column>
     <column>
      <property name="text">
+      <string>Quantidade</string>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+    </column>
+    <column>
+     <property name="text">
       <string>Categoria</string>
      </property>
      <property name="font">

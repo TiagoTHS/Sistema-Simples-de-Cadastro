@@ -34,7 +34,7 @@
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>../../../../../Pictures/aco-forte.jpg</pixmap>
+     <pixmap>../images/aco-forte.jpg</pixmap>
     </property>
     <property name="alignment">
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
