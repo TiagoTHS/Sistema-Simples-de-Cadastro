@@ -1,5 +1,5 @@
 from PyQt5 import uic,QtWidgets
-from funcoes import botoes
+from functions import botoes
 import mysql.connector
 
 

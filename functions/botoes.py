@@ -2,7 +2,6 @@ from PyQt5 import QtWidgets
 from reportlab.pdfgen import canvas
 from database.conexaoDB import ConexaoMySQL
 
-
 banco = ConexaoMySQL()
 
 # Função para o botão 'Login'
