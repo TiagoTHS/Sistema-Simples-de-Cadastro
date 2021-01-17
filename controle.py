@@ -7,9 +7,10 @@ banco = mysql.connector.connect(
     host="localhost",
     user="root",
     passwd="",
-    database="cadastro_produtos"
+    database="loja_demo"
 )
 
+#Função para o botão 'Login'
 def funcao_login():
     user = str(tela_login.lineEdit.text())
     senha = str(tela_login.lineEdit_2.text())
@@ -20,12 +21,15 @@ def funcao_login():
     else:
         tela_login.label_4.setText("Usuário ou senha incorretos!")
 
-def funcao_cadastro():
-    tela_cadastro.show()
+#Função para o botão 'Cadastro de Produtos' no Menu
+def funcao_cadastro(tela):
+    tela.show()
 
+#Função para o botão 'Sair'
 def funcao_sair():
     menu.close()
 
+#Função para o botão 'Voltar'
 def funcao_voltar():
     tela_cadastro.close()
     listagem.close()
@@ -35,6 +39,7 @@ def funcao_enviar():
     linha1 = tela_cadastro.lineEdit.text()
     linha2 = tela_cadastro.lineEdit_2.text()
     linha3 = tela_cadastro.lineEdit_3.text()
+    linha4 = tela_cadastro.lineEdit_4.text()
     categoria = ""
 
     if tela_cadastro.radioButton.isChecked() :
@@ -47,8 +52,8 @@ def funcao_enviar():
         categoria = "Nao Especificada"
 
     cursor = banco.cursor()
-    comando_SQL = "insert into produtos (codigo, descricao, preco, categoria) values (%s, %s, %s, %s)"
-    dados = (str(linha1), str(linha2), str(linha3), categoria)
+    comando_SQL = "insert into produtos (codigo, descricao, preco, quantidade, categoria) values (%s, %s, %s, %s, %s)"
+    dados = (str(linha1), str(linha2), str(linha3), str(linha4), categoria)
     cursor.execute(comando_SQL, dados)
     banco.commit()
     banco.close()
@@ -56,37 +61,40 @@ def funcao_enviar():
     print("Codigo: ", linha1)
     print("Descricao: ", linha2)
     print("Preco: ", linha3)
+    print("Quantidade: ", linha4)
     print(f"Categoria {categoria} Selecionada")
 
     #Limpa o que esta escrito no formulario para um novo cadastro
     tela_cadastro.lineEdit.setText("")
     tela_cadastro.lineEdit_2.setText("")
     tela_cadastro.lineEdit_3.setText("")
-
-
+    tela_cadastro.lineEdit_4.setText("")
 
 #Função para o botão 'Listar', que abre uma nova janela com a listagem dos produtos
 def funcao_listar():
+
     listagem.show()
 
-    cursor = banco.cursor()
-    comando_SQL = "select * from produtos"
-    cursor.execute(comando_SQL)
-    dados_lidos = cursor.fetchall()
+    try:
+        cursor = banco.cursor()
+        comando_SQL = "select * from produtos"
+        cursor.execute(comando_SQL)
+        dados_lidos = cursor.fetchall()
 
-    listagem.tableWidget.setRowCount(len(dados_lidos))
-    listagem.tableWidget.setColumnCount(4)
+        listagem.tableWidget.setRowCount(len(dados_lidos))
+        listagem.tableWidget.setColumnCount(5)
 
-    # listagem.tableWidget.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem("Código"))
-    # listagem.tableWidget.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem("Descrição"))
-    # listagem.tableWidget.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem("Preço"))
-    # listagem.tableWidget.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem("Categoria"))
+        # listagem.tableWidget.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem("Código"))
+        # listagem.tableWidget.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem("Descrição"))
+        # listagem.tableWidget.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem("Preço"))
+        # listagem.tableWidget.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem("Categoria"))
 
-    for i in range(0, len(dados_lidos)):
-        listagem.tableWidget.setVerticalHeaderItem(i, QtWidgets.QTableWidgetItem(str(dados_lidos[i][0])))
-        for j in range(0, 4):
-            listagem.tableWidget.setItem(i, j ,QtWidgets.QTableWidgetItem(str(dados_lidos[i][j+1])))
-    
+        for i in range(0, len(dados_lidos)):
+            listagem.tableWidget.setVerticalHeaderItem(i, QtWidgets.QTableWidgetItem(str(dados_lidos[i][0])))
+            for j in range(0, 5):
+                listagem.tableWidget.setItem(i, j ,QtWidgets.QTableWidgetItem(str(dados_lidos[i][j+1])))
+    except:
+        print("Erro ao listar os produtos / Nao ha produtos a serem listados")
 
 # Função que gera um pdf com os valores contidos no banco de dados
 def funcao_pdf ():
@@ -119,8 +127,7 @@ def funcao_pdf ():
     aviso_pdf.show()
     print("PDF salvo com sucesso")
 
-
-
+#Função para o botão 'Excluir linha selecionada'
 def funcao_excluir_dado() :
     linha_selecionada = listagem.tableWidget.currentRow()
     listagem.tableWidget.removeRow(linha_selecionada)
@@ -132,6 +139,7 @@ def funcao_excluir_dado() :
     cursor.execute("delete from produtos where id ="+ str(valor_id))
     banco.close()
 
+#Função para o botão 'Vender'
 def funcao_vender():
 
     tela_venda.lineEdit.setText("")
@@ -152,6 +160,7 @@ def funcao_vender():
     completer = QtWidgets.QCompleter(lista_desc)
     tela_venda.lineEdit_4.setCompleter(completer)
 
+#Função para o botão 'Completar'
 def funcao_completar():
 
     cursor = banco.cursor()
@@ -180,47 +189,125 @@ def funcao_completar():
             valor_total = ((valor_un[0][0]) * float(quant))
             tela_venda.lineEdit_5.setText(str(valor_total))
 
+#Função para o botão 'Finalizar'
+def funcao_finalizar():
+
+    nome = tela_venda.lineEdit.text()
+    cod = tela_venda.lineEdit_2.text()
+    desc = tela_venda.lineEdit_4.text()
+    quant = float(tela_venda.lineEdit_3.text())
+    total = tela_venda.lineEdit_5.text()
+
+    cursor = banco.cursor()
+    cursor.execute("select quantidade from produtos where codigo = '{}'".format(cod))
+    quant_inicial = cursor.fetchall()
+    quant_final = quant_inicial[0][0] - quant
+    cursor.execute("update produtos set quantidade = {} where codigo = '{}'".format(quant_final, cod))
+    
+    comando_SQL = "insert into vendas (cliente, codigo, descricao, quantidade, valortotal) values (%s, %s, %s, %s, %s)"
+    dados = (str(nome), str(cod), str(desc), str(quant), str(total))
+    cursor.execute(comando_SQL, dados)
+    banco.commit()
+
+    pos_venda.show()
+    
+
 #carrega os arquivos de interface do sistema
 app=QtWidgets.QApplication([])
-tela_cadastro=uic.loadUi("ui\cadastro.ui")
-listagem=uic.loadUi("ui\listagem.ui")
-aviso_pdf=uic.loadUi("ui\warning_pdf.ui")
-tela_login=uic.loadUi("ui\login.ui")
-menu=uic.loadUi("ui\segunda_tela.ui")
-tela_venda=uic.loadUi("ui\window_venda.ui")
 
-#chama a funçao para o botão 'Login' 
-tela_login.pushButton.clicked.connect(funcao_login)
 
+''' Tela de Cadastro
+
+    Nesta tela é exibido um formulário que, se preenchido corretamente, ao clicar em Enviar
+    é feita uma conexão com o banco de dados e inserida as informações do formulario na table 'produtos'.
+
+    - Carrega a UI desta tela com 'loadUi'
+    - Realiza a conexão de funções para os botões presentes nesta tela
+    
+ '''
+tela_cadastro=uic.loadUi(r"ui\cadastro.ui")
 #chama a funçao para o botão 'Enviar'
 tela_cadastro.pushButton.clicked.connect(funcao_enviar)
-
 #chama a funçao para o botão 'Voltar'
 tela_cadastro.pushButton_2.clicked.connect(funcao_voltar)
 
-#chama a funçao para o botão 'Cadastrar'
-menu.pushButton.clicked.connect(funcao_cadastro)
 
-#chama a funçao para o botão 'Listar'
-menu.pushButton_2.clicked.connect(funcao_listar)
+''' Tela de Listagem
 
-#chama a funçao para o botão 'Vender'
-menu.pushButton_3.clicked.connect(funcao_vender)
+    Nesta tela é feita uma busca no banco de dados, na table 'produtos', para que seja apresentado ao usuário
+    os produtos já cadastrados.
 
-#chama a funçao para o botão 'Sair'
-menu.pushButton_4.clicked.connect(funcao_sair)
+    É oferecido ao Usuário as opções de criar um pdf com os dados, 
+    e também de excluir algum produto ao selecionar a linha desejada.
 
+    - Carrega a UI desta tela com 'loadUi'
+    - Realiza a conexão de funções para os botões presentes nesta tela
+    
+ '''
+listagem=uic.loadUi(r"ui\listagem.ui")
 #chama a funçao para o botão 'PDF'
 listagem.pushButton.clicked.connect(funcao_pdf)
-
 #chama a funçao para o botão 'Excluir'
 listagem.pushButton_2.clicked.connect(funcao_excluir_dado)
-
 #chama a funçao para o botão 'Voltar'
 listagem.pushButton_3.clicked.connect(funcao_voltar)
 
+
+''' Tela de Login
+
+    Tela clássica de Login para o usuário.
+
+    - Carrega a UI desta tela com 'loadUi'
+    - Realiza a conexão de funções para os botões presentes nesta tela
+    
+ '''
+tela_login=uic.loadUi(r"ui\login.ui")
+#chama a funçao para o botão 'Login' 
+tela_login.pushButton.clicked.connect(funcao_login)
+
+
+''' Tela de Menu
+
+    É a principal tela que leva para as demais opções disponíveis no sistema (Vender, Cadastrar, Listar).
+
+    - Carrega a UI desta tela com 'loadUi'
+    - Realiza a conexão de funções para os botões presentes nesta tela
+    
+ '''
+menu=uic.loadUi(r"ui\segunda_tela.ui")
+#chama a funçao para o botão 'Cadastrar'
+menu.pushButton.clicked.connect(lambda: funcao_cadastro(tela_cadastro))
+#chama a funçao para o botão 'Listar'
+menu.pushButton_2.clicked.connect(funcao_listar)
+#chama a funçao para o botão 'Vender'
+menu.pushButton_3.clicked.connect(funcao_vender)
+#chama a funçao para o botão 'Sair'
+menu.pushButton_4.clicked.connect(funcao_sair)
+
+
+''' Tela de Venda
+
+    Nesta tela é exibido um formulário que, se preenchido corretamente, ao clicar em Finalizar
+    é feita uma conexão com o banco de dados e inserida as informações do formulario na table 'vendas'.
+    
+    Para ajudar na hora de completar os dados, há um botão Completar que com a entrada de apenas
+    (Descrição e Quantidade) ou (Código e Quantidade), os espaços (Código/Descrição) e Valor Total são completados automaticamente,
+    além de uma ajuda com 'autocomplete' ao se optar por digitar a Descrição.
+
+    - Carrega a UI desta tela com 'loadUi'
+    - Realiza a conexão de funções para os botões presentes nesta tela
+    
+ '''
+tela_venda=uic.loadUi(r"ui\window_venda.ui")
 #chama a funçao para o botão 'Completar'
 tela_venda.pushButton.clicked.connect(funcao_completar)
+#chama a funçao para o botão 'Finalizar'
+tela_venda.pushButton_2.clicked.connect(funcao_finalizar)
+
+
+
+aviso_pdf=uic.loadUi(r"ui\warning_pdf.ui")
+pos_venda=uic.loadUi(r"ui\pos_venda.ui")
 
 tela_login.show()
 app.exec()
