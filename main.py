@@ -2,7 +2,6 @@ from PyQt5 import uic,QtWidgets
 from functions import botoes
 import mysql.connector
 
-
 #carrega os arquivos de interface do sistema
 app=QtWidgets.QApplication([])
 
@@ -26,8 +25,8 @@ tela_cadastro.pushButton_2.clicked.connect(lambda : tela_cadastro.close())
 
 ''' Tela de Listagem
 
-    Nesta tela é feita uma busca no banco de dados, na table 'produtos', para que seja apresentado ao usuário
-    os produtos já cadastrados.
+    Nesta tela é feita uma busca no banco de dados, na table 'produtos' e 'vendas', para que seja apresentado ao usuário
+    os produtos já cadastrados e as vendas já realizadas.
 
     É oferecido ao Usuário as opções de criar um pdf com os dados, 
     e também de excluir algum produto ao selecionar a linha desejada.
@@ -44,6 +43,9 @@ listagem.pushButton_2.clicked.connect(lambda : botoes.funcao_excluir_dado(listag
 #chama a funçao para o botão 'Voltar'
 listagem.pushButton_3.clicked.connect(lambda : listagem.close())
 
+lista_vendas=uic.loadUi(r"ui\lista_vendas.ui")
+#chama a funçao para o botão 'Voltar'
+lista_vendas.pushButton_3.clicked.connect(lambda : lista_vendas.close())
 
 
 ''' Tela de Menu
@@ -57,12 +59,14 @@ listagem.pushButton_3.clicked.connect(lambda : listagem.close())
 menu=uic.loadUi(r"ui\segunda_tela.ui")
 #chama a funçao para o botão 'Cadastrar'
 menu.pushButton.clicked.connect(lambda : tela_cadastro.show())
-#chama a funçao para o botão 'Listar'
-menu.pushButton_2.clicked.connect(lambda : botoes.funcao_listar(listagem))
+#chama a funçao para o botão 'Listar Produtos'
+menu.pushButton_2.clicked.connect(lambda : botoes.funcao_listarProd(listagem))
 #chama a funçao para o botão 'Vender'
 menu.pushButton_3.clicked.connect(lambda : botoes.funcao_vender(tela_venda))
 #chama a funçao para o botão 'Sair'
 menu.pushButton_4.clicked.connect(lambda : menu.close())
+#chama a funçaõ para o botao 'Listar Vendas'
+menu.pushButton_5.clicked.connect(lambda : botoes.funcao_listarVenda(lista_vendas))
 
 
 
@@ -99,11 +103,20 @@ tela_venda.pushButton.clicked.connect(lambda : botoes.funcao_completar(tela_vend
 #chama a funçao para o botão 'Finalizar'
 tela_venda.pushButton_2.clicked.connect(lambda : botoes.funcao_finalizar(tela_venda, pos_venda))
 
+''' Tela de Pos Venda
 
+    Tela de aviso de sucesso na venda.
+
+    - Carrega a UI desta tela com 'loadUi'
+    - Realiza a conexão de funções para os botões presentes nesta tela
+    
+ '''
+pos_venda=uic.loadUi(r"ui\pos_venda.ui")
+# Chama a função para o botão 'OK'
+pos_venda.pushButton.clicked.connect(lambda : pos_venda.close())
+pos_venda.pushButton.clicked.connect(lambda : tela_venda.close())
 
 aviso_pdf=uic.loadUi(r"ui\warning_pdf.ui")
-pos_venda=uic.loadUi(r"ui\pos_venda.ui")
-
 
 tela_login.show()
 app.exec()

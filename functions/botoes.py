@@ -37,18 +37,20 @@ def funcao_enviar(tela):
         categoria = "Nao Especificada"
 
     if linha1 and linha2 and linha3 and linha4:
-        cursor = banco.cursor()
-        comando_SQL = "insert into produtos (codigo, descricao, preco, quantidade, categoria) values (%s, %s, %s, %s, %s)"
-        dados = (str(linha1), str(linha2), str(linha3), str(linha4), categoria)
-        cursor.execute(comando_SQL, dados)
-        banco.commit()
+        try :
+            cursor = banco.cursor()
+            comando_SQL = "insert into produtos (codigo, descricao, preco, quantidade, categoria) values (%s, %s, %s, %s, %s)"
+            dados = (str(linha1), str(linha2), str(linha3), str(linha4), categoria)
+            cursor.execute(comando_SQL, dados)
+            banco.commit()
 
-        print("Codigo: ", linha1)
-        print("Descricao: ", linha2)
-        print("Preco: ", linha3)
-        print("Quantidade: ", linha4)
-        print(f"Categoria {categoria} Selecionada")
-
+            print("Codigo: ", linha1)
+            print("Descricao: ", linha2)
+            print("Preco: ", linha3)
+            print("Quantidade: ", linha4)
+            print(f"Categoria {categoria} Selecionada")
+        except :
+            print("Erro ao cadastrar o produto / Ja ha um produto com esse codigo")
     else:
         print("Adicione infos!")
 
@@ -60,15 +62,67 @@ def funcao_enviar(tela):
 
 
 
-# Função para o botão 'Listar', que abre uma nova janela com a listagem dos produtos
+# Função para o botão 'Atualizar', que atualiza os dados recebidos do formulario no banco de dados
+# Como parametro, a propria tela de atualização para salvar informações digitadas
+def funcao_att(tela):
+    cod = tela.lineEdit.text()
+    desc = tela.lineEdit_2.text()
+    preco = tela.lineEdit_3.text()
+    quant = tela.lineEdit_4.text()
+
+    cursor = banco.cursor()
+    if desc:
+        cursor.execute("update produtos set descricao = '{}' where codigo = '{}'".format(desc, cod))
+    if preco:
+        cursor.execute("update produtos set preco = '{}' where codigo = '{}'".format(preco, cod))
+    if quant:
+        cursor.execute("update produtos set quantidade = '{}' where codigo = '{}'".format(quant, cod))
+
+    banco.commit()
+
+
+
+# Função para o botão 'Listar Produtos', que abre uma nova janela com a listagem dos produtos
 # Como parametro, a tela de listagem a ser mostrada
-def funcao_listar(proxTela):
+def funcao_listarProd(proxTela):
 
     proxTela.show()
 
     try:
         cursor = banco.cursor()
         comando_SQL = "select * from produtos"
+        cursor.execute(comando_SQL)
+        dados_lidos = cursor.fetchall()
+
+        d = lambda dado: dado[2]
+        dados_lidos.sort(key=d)
+
+        proxTela.tableWidget.setRowCount(len(dados_lidos))
+        proxTela.tableWidget.setColumnCount(5)
+
+        # proxTela.tableWidget.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem("Código"))
+        # proxTela.tableWidget.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem("Descrição"))
+        # proxTela.tableWidget.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem("Preço"))
+        # proxTela.tableWidget.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem("Categoria"))
+
+        for i in range(0, len(dados_lidos)):
+            proxTela.tableWidget.setVerticalHeaderItem(i, QtWidgets.QTableWidgetItem(str(dados_lidos[i][0])))
+            for j in range(0, 5):
+                proxTela.tableWidget.setItem(i, j ,QtWidgets.QTableWidgetItem(str(dados_lidos[i][j+1])))
+    except:
+        print("Erro ao listar os produtos / Nao ha produtos a serem listados")
+
+
+
+# Função para o botão 'Listar Vendas', que abre uma nova janela com a listagem das Vendas
+# Como parametro, a tela de listagem a ser mostrada
+def funcao_listarVenda(proxTela):
+
+    proxTela.show()
+
+    try:
+        cursor = banco.cursor()
+        comando_SQL = "select * from vendas"
         cursor.execute(comando_SQL)
         dados_lidos = cursor.fetchall()
 
@@ -85,7 +139,7 @@ def funcao_listar(proxTela):
             for j in range(0, 5):
                 proxTela.tableWidget.setItem(i, j ,QtWidgets.QTableWidgetItem(str(dados_lidos[i][j+1])))
     except:
-        print("Erro ao listar os produtos / Nao ha produtos a serem listados")
+        print("Erro ao listar as vendas / Nao ha vendas a serem listadas")
 
 
 
@@ -142,13 +196,13 @@ def funcao_excluir_dado(tela) :
 # Como parametro a tela de venda a ser mostrada
 # Criação de um completer para auxiliar na escrita da descrição
 def funcao_vender(proxTela):
-
+    
     proxTela.lineEdit.setText("")
     proxTela.lineEdit_2.setText("")
     proxTela.lineEdit_3.setText("")
     proxTela.lineEdit_4.setText("")
     proxTela.lineEdit_5.setText("")
-
+    
     proxTela.show()
 
     cursor = banco.cursor()
@@ -196,6 +250,7 @@ def funcao_completar(tela):
 
 
 # Função para o botão 'Finalizar'
+# Como parametro a tela de venda para salvar informações, e a tela de pós venda
 def funcao_finalizar(tela, proxTela):
 
     nome = tela.lineEdit.text()
