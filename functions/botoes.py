@@ -90,12 +90,12 @@ def funcao_listarProd(proxTela):
 
     try:
         cursor = banco.cursor()
-        comando_SQL = "select * from produtos"
+        comando_SQL = "select * from produtos order by descricao"
         cursor.execute(comando_SQL)
         dados_lidos = cursor.fetchall()
 
-        d = lambda dado: dado[2]
-        dados_lidos.sort(key=d)
+        # d = lambda dado: dado[2]
+        # dados_lidos.sort(key=d)
 
         proxTela.tableWidget.setRowCount(len(dados_lidos))
         proxTela.tableWidget.setColumnCount(5)
